@@ -3,9 +3,8 @@
 The Information Fuzzy Network (IFN) model is designed to find the best attribute to split by at each level of the model. It works with both categorical and numeric attributes, ensuring that the splits maximize the mutual information between the input variables and the target variable. The model also implements Fano's Inequality to estimate the minimum prediction error.
 The model allows for 1 attribute on each level, meaning all nodes will be splitted by it, if significant for them, or will be directed to the target nodes ('leaf' nodes) and be determined as terminal.
 
-```markdown
 ![Network Visualization](IFN_Image.png)
-```
+
 
 ## Key Features
 
@@ -30,3 +29,14 @@ For numeric attributes, the model recursively finds the best splits by:
 1. Identifying the unique values of the attribute.
 2. Testing different thresholds to see how they split the data.
 3. Ensuring the splits are meaningful by evaluating the significance using `_significance_test`.
+
+## Available Public Methods
+
+### IFN Class
+
+- **`__init__(self, train_data, target, P_VALUE_THRESH, max_depth, weights_type)`**: Initializes the IFN model with the training data, target variable, and significance threshold. You can limit the depth to avoid overfitting (on edge cases) and weights_type controls the weights displayed when plotting.
+- **`plot_network(self)`**: Plots the network visualization of the IFN model using NetworkX.
+- **`predict(self, df)`**: Predicts the target variable for a given dataframe using the trained IFN model.
+- **`calculate_min_error_probability(self)`**: Assess the max error from the model, using the edge weight.
+
+You can see a testing sample for both ordinal and categorical features on the Testing section of the notebook.
