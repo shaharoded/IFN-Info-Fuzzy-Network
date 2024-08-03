@@ -5,6 +5,14 @@ The model allows for 1 attribute on each level, meaning all nodes will be splitt
 
 ![Network Visualization](IFN_Image.png)
 
+The IFN model should be a useful model for classification tasks.
+
+Demonstrated below are the model's eveluation results on the Iris dataset, showing good prediction results on binned data.
+
+![Network Visualization](IFN_Classification_Results.png)
+
+Performance was even better using accurate numerical attr split, but be advised that the runtime is significantly longer. 
+
 
 ## Key Features
 
