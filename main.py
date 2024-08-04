@@ -5,17 +5,16 @@ from sklearn.metrics import classification_report
 import pandas as pd
 import numpy as np
 
-def main(how = 'binned'):
-    # Load the Iris dataset
+def main():
+    # Load the dataset
     iris = load_iris()
     data = pd.DataFrame(data= np.c_[iris['data'], iris['target']],
-                        columns= iris['feature_names'] + ['target'])
+                    columns= iris['feature_names'] + ['target'])
 
-    if how == 'binned':
-        # Convert numerical features to categorical by binning
-        for col in iris['feature_names']:
-            data[col] = pd.cut(data[col], bins=3, labels=["low", "medium", "high"])
-
+    # Map target values to species names
+    target_names = {0: 'setosa', 1: 'versicolor', 2: 'virginica'}
+    data['target'] = data['target'].map(target_names)
+    
     # Split the dataset into training and testing sets
     train_data, test_data = train_test_split(data, test_size=0.2, random_state=42)
 
@@ -28,7 +27,7 @@ def main(how = 'binned'):
     # Define the function for classification report
     def test_model(model, test_data):
         test_features = test_data.drop(columns=[target_var])
-        test_labels = test_data[target_var].astype(int)
+        test_labels = test_data[target_var]
 
         predictions = model.predict(test_features)
         print(classification_report(test_labels, predictions))
@@ -40,6 +39,4 @@ def main(how = 'binned'):
     test_model(ifn_cat, test_data)
 
 if __name__ == "__main__":
-    # data_prep = 'binned'    # Replace with None if you want it as is
-    data_prep = None    # Replace with binned if you want it ninned
-    main(data_prep)
+    main()

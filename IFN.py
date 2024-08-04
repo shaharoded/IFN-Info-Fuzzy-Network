@@ -91,7 +91,7 @@ class IFN:
         Initialize the target nodes based on the unique values in the target variable.
         '''
         target_values = self.train_data[self.target].unique()
-        target_nodes = [IFN.Node(self.train_data[self.train_data[self.target] == val], level_attr='target', level_attr_val=val, is_terminal=True, color='red') for val in target_values]
+        target_nodes = [IFN.Node(self.train_data[self.train_data[self.target] == val], level_attr=self.target, level_attr_val=val, is_terminal=True, color='red') for val in target_values]
         for target_node in target_nodes:
             logging.info(f'Target Class Initiated: "{target_node.level_attr_val}", No. Records = {len(target_node.data)}')
         return target_nodes

@@ -1,14 +1,16 @@
 # Information Fuzzy Network (IFN) Model
 
-The Information Fuzzy Network (IFN) model is designed to find the best attribute to split by at each level of the model. It works with both categorical and numeric attributes, ensuring that the splits maximize the mutual information between the input variables and the target variable. The model also implements Fano's Inequality to estimate the minimum prediction error. Each level of the model allows for one attribute split, meaning all nodes at that level will be split by the selected attribute if significant, or directed to the target nodes ('leaf' nodes) and determined as terminal.
+The Information Fuzzy Network (IFN) model is designed to statistically find the best attribute to split by at each level of the model using chi-square test. It works with both categorical and numeric attributes, ensuring that the splits maximize the mutual information between the input variables and the target variable, while, unlike decision trees, split only when the improvement is significant. The model also implements Fano's Inequality to estimate the maximum prediction error. Each level of the model allows for one attribute split, meaning all nodes at that level will be split by the selected attribute if significant, or directed to the target nodes ('leaf' nodes) and determined as terminal.
 
-![Network Visualization](Images/IFN_Image.png)
+![Network Visualization](Images/IFN_Iris.png)
 
-The IFN model is useful for classification tasks. Below are the evaluation results on the Iris dataset, demonstrating good prediction performance on binned data.
+The IFN model is useful for classification tasks. Below are the evaluation results on the Iris dataset, demonstrating good prediction performance.
 
-![Network Visualization](Images/IFN_Classification_Results.png)
+![Network Visualization](Images/IFN_Classification_Report.png)
 
-Performance improves further with precise numerical attribute splits, but note that the runtime is significantly longer.
+Train and prediction are possible on both categorical and numeric attributes, but note that the recursive optimal split detection on numeric ordinal variables can increase the runtime significantly, depends on the size of the data.
+
+Target column can be either int or str, as long as it's descrete and has a reasonable amount of labels compared to the data size.
 
 To start, run the following command in the terminal:
 
