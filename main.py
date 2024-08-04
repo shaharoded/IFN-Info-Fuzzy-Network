@@ -40,6 +40,6 @@ def main(how = 'binned'):
     test_model(ifn_cat, test_data)
 
 if __name__ == "__main__":
-    data_prep = 'binned'    # Replace with None if you want it as is
-    # data_prep = None    # Replace with binned if you want it ninned
+    # data_prep = 'binned'    # Replace with None if you want it as is
+    data_prep = None    # Replace with binned if you want it ninned
     main(data_prep)

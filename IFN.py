@@ -5,6 +5,7 @@ from scipy.stats import chi2
 from scipy.optimize import fsolve
 import networkx as nx
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
 import logging
 from functools import wraps
 import time
@@ -176,9 +177,11 @@ class IFN:
                 bin_suggestions[attr] = thresholds
 
         # Create threshold per level if attr is ordinal
+        # bin_suggestions[attr] is the bins edges for the attribute
         for attr in bin_suggestions:
             bin_suggestions[attr] = [-float('inf')] + bin_suggestions[attr] + [float('inf')]
-            binned_column = pd.cut(self.train_data[attr], bins=bin_suggestions[attr], labels=False)
+            bin_labels = [f"({bin_suggestions[attr][i]}, {bin_suggestions[attr][i+1]}]" for i in range(len(bin_suggestions[attr])-1)]
+            binned_column = pd.cut(self.train_data[attr], bins=bin_suggestions[attr], labels=bin_labels)
             self.train_data[attr] = binned_column
         return bin_suggestions      # Replace init dictionary
 
@@ -351,6 +354,77 @@ class IFN:
         self.plot = self.__plot_network()
 
 
+    # def __plot_network(self):
+    #     '''
+    #     Plot the IFN network.
+
+    #     Returns:
+    #         matplotlib.pyplot: The plot object.
+    #     '''
+    #     G = nx.DiGraph()
+    #     colors = []
+    #     pos = {}
+    #     labels = {}
+
+    #     # Add nodes to the graph
+    #     for level_index, level in enumerate(self.levels):
+    #         for node_index, node in enumerate(level):
+    #             node_id = id(node)
+    #             G.add_node(node_id)
+    #             colors.append(node.color)
+    #             # Assign positions based on level and order within the level
+    #             pos[node_id] = (node_index, -level_index)
+    #             # Add label if the node is not a root node (purple)
+    #             if node.color != 'purple':
+    #                 labels[node_id] = node.level_attr_val
+
+    #     # Add edges to the graph, only include weights that are not None
+    #     edge_labels = {}
+    #     for (parent, child, weight) in self.edges:
+    #         parent_id = id(parent)
+    #         child_id = id(child)
+    #         # Ensure weight is a valid number and not None
+    #         if weight is not None:
+    #             # Decide which edge label to plot
+    #             if self.weights_type == 'probability':
+    #                 rounded_weight = round(weight['probability'], 2)
+    #             else:
+    #                 rounded_weight = round(weight['weight'], 2)
+    #             G.add_edge(parent_id, child_id, weight=rounded_weight)
+    #             edge_labels[(parent_id, child_id)] = rounded_weight
+    #         else:
+    #             G.add_edge(parent_id, child_id)
+
+    #     # Create a wider figure
+    #     plt.figure(figsize=(13, 5))  # Adjust the width and height as needed
+    #     # Draw the graph with bigger nodes and brighter colors
+    #     nx.draw(G, pos, with_labels=False, node_color=colors, node_size=1000, alpha=0.6)
+    #     nx.draw_networkx_labels(G, pos, labels=labels, font_size=7, font_color='black', font_family='sans-serif', font_weight='bold')
+
+    #     # Draw edge labels with smaller font size and rounded values
+    #     edge_label_options = {
+    #         "font_size": 7,
+    #         "rotate": False,
+    #     }
+    #     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, **edge_label_options)
+
+    #     # Find the maximum x-coordinate of the nodes
+    #     max_x = max(x for x, y in pos.values())
+
+    #     # Draw level names with dashed lines
+    #     for level_index, level in enumerate(self.levels):
+    #         if level:
+    #             first_node = level[0]
+    #             first_node_id = id(first_node)
+    #             first_node_pos = pos[first_node_id]
+    #             level_name = first_node.level_attr  # Assuming all nodes in the level have the same level_attr
+
+    #             # Draw dashed line for the level
+    #             plt.plot([0, max_x + 0.1], [first_node_pos[1], first_node_pos[1]], color='gray', linestyle='--', linewidth=0.5)
+    #             # Add level name text slightly to the right of the most right node
+    #             plt.text(max_x + 0.15, first_node_pos[1], level_name, verticalalignment='center', fontsize=12, color='gray')
+    #     return plt
+    
     def __plot_network(self):
         '''
         Plot the IFN network.
@@ -362,49 +436,68 @@ class IFN:
         colors = []
         pos = {}
         labels = {}
+        edge_weights = []
+
+        terminal_nodes = set()
 
         # Add nodes to the graph
         for level_index, level in enumerate(self.levels):
             for node_index, node in enumerate(level):
                 node_id = id(node)
                 G.add_node(node_id)
-                colors.append(node.color)
+                # Control node color luminance
+                colors.append(node.color if node.color != 'purple' else 'mediumpurple')
                 # Assign positions based on level and order within the level
                 pos[node_id] = (node_index, -level_index)
                 # Add label if the node is not a root node (purple)
                 if node.color != 'purple':
                     labels[node_id] = node.level_attr_val
+                # Determine terminal nodes
+                if not any(child for (parent, child, _) in self.edges if id(parent) == node_id):
+                    terminal_nodes.add(node_id)
 
         # Add edges to the graph, only include weights that are not None
-        edge_labels = {}
         for (parent, child, weight) in self.edges:
             parent_id = id(parent)
             child_id = id(child)
             # Ensure weight is a valid number and not None
             if weight is not None:
-                # Decide which edge label to plot
                 if self.weights_type == 'probability':
-                    rounded_weight = round(weight['probability'], 2)
+                    edge_weights.append(weight['probability'])
                 else:
-                    rounded_weight = round(weight['weight'], 2)
-                G.add_edge(parent_id, child_id, weight=rounded_weight)
-                edge_labels[(parent_id, child_id)] = rounded_weight
+                    edge_weights.append(weight['weight'])
+                G.add_edge(parent_id, child_id)
             else:
                 G.add_edge(parent_id, child_id)
+                edge_weights.append(0.0)  # Assign a default weight if none is provided
+
+        # Normalize edge weights for colormap
+        norm = mcolors.Normalize(vmin=-0.5, vmax=max(edge_weights))
+        cmap = plt.cm.get_cmap('Purples')
+
+        # Set edge colors
+        edge_colors = []
+        for (parent, child) in G.edges():
+            if child in terminal_nodes:
+                weight = edge_weights.pop(0)
+                edge_colors.append(cmap(norm(weight)))
+            else:
+                edge_colors.append(cmap(0.4))  # Medium grey for non-terminal edges
 
         # Create a wider figure
         plt.figure(figsize=(13, 5))  # Adjust the width and height as needed
+
         # Draw the graph with bigger nodes and brighter colors
-        nx.draw(G, pos, with_labels=False, node_color=colors, node_size=700, alpha=0.6)
-        nx.draw_networkx_labels(G, pos, labels=labels, font_size=11, font_color='black')
+        nx.draw(G, pos, with_labels=False, node_color=colors, node_size=800, alpha=0.6, edge_color=edge_colors)
+        nx.draw_networkx_labels(G, pos, labels=labels, font_size=5, font_color='black', font_family='sans-serif', font_weight='bold')
 
-        # Draw edge labels with smaller font size and rounded values
-        edge_label_options = {
-            "font_size": 7,
-            "rotate": False,
-        }
-        nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, **edge_label_options)
-
+        # Add a color bar as a legend
+        norm = mcolors.Normalize(vmin=0, vmax=max(edge_weights))
+        sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+        sm.set_array([])
+        cbar = plt.colorbar(sm)
+        cbar.set_label('Edge Weight')
+    
         # Find the maximum x-coordinate of the nodes
         max_x = max(x for x, y in pos.values())
 
@@ -419,10 +512,11 @@ class IFN:
                 # Draw dashed line for the level
                 plt.plot([0, max_x + 0.1], [first_node_pos[1], first_node_pos[1]], color='gray', linestyle='--', linewidth=0.5)
                 # Add level name text slightly to the right of the most right node
-                plt.text(max_x + 0.15, first_node_pos[1], level_name, verticalalignment='center', fontsize=12, color='gray')
+                plt.text(max_x + 0.15, first_node_pos[1], level_name, verticalalignment='center', fontsize=9, color='gray')
+         
         return plt
 
-
+    
     def show(self):
         '''
         Display the plot of the IFN network.
@@ -513,5 +607,6 @@ class IFN:
         # Create appropriate bins in input data
         if self.bin_suggestions:
             for attr in self.bin_suggestions:
-                df[attr] = pd.cut(df[attr], bins=self.bin_suggestions[attr], labels=False)
+                bin_labels = [f"({self.bin_suggestions[attr][i]}, {self.bin_suggestions[attr][i+1]}]" for i in range(len(self.bin_suggestions[attr])-1)]
+                df[attr] = pd.cut(df[attr], bins=self.bin_suggestions[attr], labels=bin_labels)
         return df.apply(lambda record: self.__predict_record(record), axis=1)
