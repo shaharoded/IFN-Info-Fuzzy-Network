@@ -6,9 +6,37 @@ from scipy.optimize import fsolve
 import networkx as nx
 import matplotlib.pyplot as plt
 import logging
+from functools import wraps
+import time
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+def validate_input_type(expected_type):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # Skip the first argument which is 'self' in instance methods
+            for arg in args[1:]:
+                if not isinstance(arg, expected_type):
+                    raise TypeError(f"Argument must be of type {expected_type}")
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
+def time_method_call(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        print(f"{func.__name__} took {end_time - start_time:.4f} seconds")
+        return result
+    return wrapper
+
 
 class IFN:
     '''
@@ -68,6 +96,7 @@ class IFN:
         return target_nodes
 
 
+    @time_method_call
     def __init_create_bin_suggestions(self):
         '''
         Return value is a dictionary of suggestions for binning per column, if column
@@ -133,35 +162,35 @@ class IFN:
 
             return sorted(thresholds)
 
-        numerical_columns = [col for col in self.train_data.columns if col != self.target and pd.api.types.is_numeric_dtype(self.train_data[col])]
-        if not numerical_columns:
+        numerical_attributes = [attr for attr in self.train_data.columns if attr != self.target and pd.api.types.is_numeric_dtype(self.train_data[attr])]
+        if not numerical_attributes:
             return {}
 
         logging.info('Looking for optimal threshold points in numerical columns')
         bin_suggestions = {}
 
-        for col in numerical_columns:
-            logging.info(f"Processing column: {col}")
-            thresholds = recursive_find_splits(self.train_data, col)
+        for attr in numerical_attributes:
+            logging.info(f"Processing column: {attr}")
+            thresholds = recursive_find_splits(self.train_data, attr)
             if thresholds:
-                bin_suggestions[col] = thresholds
+                bin_suggestions[attr] = thresholds
 
         # Create threshold per level if attr is ordinal
         for attr in bin_suggestions:
             bin_suggestions[attr] = [-float('inf')] + bin_suggestions[attr] + [float('inf')]
-            bin_column = pd.cut(self.train_data[attr], bins=bin_suggestions[attr], labels=False)
-            self.train_data[attr] = bin_column
-        return bin_suggestions
+            binned_column = pd.cut(self.train_data[attr], bins=bin_suggestions[attr], labels=False)
+            self.train_data[attr] = binned_column
+        return bin_suggestions      # Replace init dictionary
 
 
-    def __mutual_information(self, data: pd.DataFrame, input: str) -> float:
+    def __mutual_information(self, data: pd.DataFrame, attr: str) -> float:
         '''
         Mutual information calculation for the IFN model, calculated as a sum of all
         conditional mutual informations per xi in X (input variables) compared to Y (target variable).
 
         Args:
             data: the subset of the data at node Z.
-            input: string, the input variable (column name) for which mutual information is calculated.
+            attr: string, the input variable (column name) for which mutual information is calculated.
 
         Returns:
             float: The mutual information value.
@@ -169,10 +198,10 @@ class IFN:
         Z = len(data)
         mi = 0
         for yi in data[self.target].unique():
-            for xi in data[input].unique():
-                P_Yj_Xi = len(data[(data[input] == xi) & (data[self.target] == yi)]) / self.N
-                P_Yj_Xi_Z = len(data[(data[input] == xi) & (data[self.target] == yi)]) / Z
-                P_Xi_Z = len(data[data[input] == xi]) / Z
+            for xi in data[attr].unique():
+                P_Yj_Xi = len(data[(data[attr] == xi) & (data[self.target] == yi)]) / self.N
+                P_Yj_Xi_Z = len(data[(data[attr] == xi) & (data[self.target] == yi)]) / Z
+                P_Xi_Z = len(data[data[attr] == xi]) / Z
                 P_Yj_Z = len(data[data[self.target] == yi]) / Z
 
                 if P_Yj_Xi == 0 or P_Xi_Z == 0 or P_Yj_Z == 0:
@@ -216,15 +245,13 @@ class IFN:
         Returns:
             string: the name of the best variable to split on.
         '''
-        available_attributes = [col for col in self.input_vars if self.input_vars[col] == 0]
+        available_attributes = [attr for attr in self.input_vars if self.input_vars[attr] == 0]
         max_mi = 0
         best_attr = None
         terminal_nodes = []
         for attr in available_attributes:
             mi_0_nodes = []  # Nodes that will turn terminal if this attr is chosen
             mi = 0
-            if attr in self.bin_suggestions:
-                level_bins = self.bin_suggestions[attr]
             for node in level:
                 # Calculate MI
                 node_mi = self.__significance_test(node.data, attr)
@@ -313,6 +340,7 @@ class IFN:
         self.__build_network(next_level, level_name)
 
 
+    @time_method_call
     def fit(self):
         '''
         Fit the IFN model to the training data.
@@ -469,6 +497,9 @@ class IFN:
 
         return None
 
+
+    @validate_input_type(pd.DataFrame)
+    @time_method_call
     def predict(self, df: pd.DataFrame) -> pd.Series:
         '''
         Predict the target values for a DataFrame.
@@ -481,6 +512,6 @@ class IFN:
         '''
         # Create appropriate bins in input data
         if self.bin_suggestions:
-            for col in self.bin_suggestions:
-                df[col] = pd.cut(df[col], bins=self.bin_suggestions[col], labels=False)
+            for attr in self.bin_suggestions:
+                df[attr] = pd.cut(df[attr], bins=self.bin_suggestions[attr], labels=False)
         return df.apply(lambda record: self.__predict_record(record), axis=1)
