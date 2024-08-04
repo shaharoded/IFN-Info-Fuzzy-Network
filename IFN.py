@@ -75,7 +75,7 @@ class IFN:
         self.P_VALUE_THRESH = P_VALUE_THRESH
         self.input_vars = {col: 0 for col in train_data.columns if col != target}  # Input vars with 1 for 'used'
         self.N = len(train_data)
-        self.bin_suggestions = self.__init_create_bin_suggestions()  # A simplified version of threshold optimization
+        self.bin_suggestions = None
         self.root = IFN.Node(train_data, level_attr='root', color='purple')
         self.target_nodes = self.__init_target_nodes()
         self.nodes = [self.root] + self.target_nodes
@@ -97,7 +97,6 @@ class IFN:
         return target_nodes
 
 
-    @time_method_call
     def __init_create_bin_suggestions(self):
         '''
         Return value is a dictionary of suggestions for binning per column, if column
@@ -348,82 +347,12 @@ class IFN:
         '''
         Fit the IFN model to the training data.
         '''
+        self.bin_suggestions = self.__init_create_bin_suggestions()  # A simplified version of threshold optimization
         self.__build_network([self.root])
         # Clean unused numerical column names
         self.bin_suggestions = {column: self.bin_suggestions[column] for column in self.bin_suggestions if self.input_vars[column] == 1}
         self.plot = self.__plot_network()
 
-
-    # def __plot_network(self):
-    #     '''
-    #     Plot the IFN network.
-
-    #     Returns:
-    #         matplotlib.pyplot: The plot object.
-    #     '''
-    #     G = nx.DiGraph()
-    #     colors = []
-    #     pos = {}
-    #     labels = {}
-
-    #     # Add nodes to the graph
-    #     for level_index, level in enumerate(self.levels):
-    #         for node_index, node in enumerate(level):
-    #             node_id = id(node)
-    #             G.add_node(node_id)
-    #             colors.append(node.color)
-    #             # Assign positions based on level and order within the level
-    #             pos[node_id] = (node_index, -level_index)
-    #             # Add label if the node is not a root node (purple)
-    #             if node.color != 'purple':
-    #                 labels[node_id] = node.level_attr_val
-
-    #     # Add edges to the graph, only include weights that are not None
-    #     edge_labels = {}
-    #     for (parent, child, weight) in self.edges:
-    #         parent_id = id(parent)
-    #         child_id = id(child)
-    #         # Ensure weight is a valid number and not None
-    #         if weight is not None:
-    #             # Decide which edge label to plot
-    #             if self.weights_type == 'probability':
-    #                 rounded_weight = round(weight['probability'], 2)
-    #             else:
-    #                 rounded_weight = round(weight['weight'], 2)
-    #             G.add_edge(parent_id, child_id, weight=rounded_weight)
-    #             edge_labels[(parent_id, child_id)] = rounded_weight
-    #         else:
-    #             G.add_edge(parent_id, child_id)
-
-    #     # Create a wider figure
-    #     plt.figure(figsize=(13, 5))  # Adjust the width and height as needed
-    #     # Draw the graph with bigger nodes and brighter colors
-    #     nx.draw(G, pos, with_labels=False, node_color=colors, node_size=1000, alpha=0.6)
-    #     nx.draw_networkx_labels(G, pos, labels=labels, font_size=7, font_color='black', font_family='sans-serif', font_weight='bold')
-
-    #     # Draw edge labels with smaller font size and rounded values
-    #     edge_label_options = {
-    #         "font_size": 7,
-    #         "rotate": False,
-    #     }
-    #     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, **edge_label_options)
-
-    #     # Find the maximum x-coordinate of the nodes
-    #     max_x = max(x for x, y in pos.values())
-
-    #     # Draw level names with dashed lines
-    #     for level_index, level in enumerate(self.levels):
-    #         if level:
-    #             first_node = level[0]
-    #             first_node_id = id(first_node)
-    #             first_node_pos = pos[first_node_id]
-    #             level_name = first_node.level_attr  # Assuming all nodes in the level have the same level_attr
-
-    #             # Draw dashed line for the level
-    #             plt.plot([0, max_x + 0.1], [first_node_pos[1], first_node_pos[1]], color='gray', linestyle='--', linewidth=0.5)
-    #             # Add level name text slightly to the right of the most right node
-    #             plt.text(max_x + 0.15, first_node_pos[1], level_name, verticalalignment='center', fontsize=12, color='gray')
-    #     return plt
     
     def __plot_network(self):
         '''
