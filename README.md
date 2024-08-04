@@ -47,6 +47,6 @@ For numeric attributes, the model recursively finds the best splits by:
 ### IFN Class
 
 - **`__init__(self, train_data, target, P_VALUE_THRESH, max_depth, weights_type)`**: Initializes the IFN model with the training data, target variable, and significance threshold. You can limit the depth to avoid overfitting (on edge cases) and weights_type controls the weights displayed when plotting.
-- **`show(self)`**: Plots the network visualization of the IFN model using NetworkX.
+- **`show(self)`**: Plots the network visualization of the IFN model using NetworkX. NOTE: The plot represent "stronger" edges (higher probability) using darker colors, which should represent how a prediction will be made if a records "landed" in that node.
 - **`predict(self, df)`**: Predicts the target variable for a given dataframe using the trained IFN model.
 - **`calculate_min_error_probability(self)`**: Assess the max error from the model, using the edge weight.
