@@ -34,7 +34,7 @@ def time_method_call(func):
         start_time = time.time()
         result = func(*args, **kwargs)
         end_time = time.time()
-        print(f"{func.__name__} took {end_time - start_time:.4f} seconds")
+        print(f"[Runtime Info]: Execution of {func.__name__} function took {end_time - start_time:.4f} seconds")
         return result
     return wrapper
 
