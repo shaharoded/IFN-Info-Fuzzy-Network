@@ -456,7 +456,9 @@ class IFN:
     def calculate_min_error_probability(self) -> float:
         '''
         Calculate the minimum prediction error P_e based on Fano's Inequality using the complete feature set.
-
+        NOTE: This method allows you to train the model on the full data (no test unseen data), and get an approximation
+        of the max error from the model.
+        
         Returns:
             float, the minimum prediction error P_e.
         '''
