@@ -1,16 +1,18 @@
 # Information Fuzzy Network (IFN) Model
 
-The Information Fuzzy Network (IFN) machine learning model is designed to statistically find the best attribute to split by at each level of the model using chi-square test. It works with both categorical and numeric attributes, ensuring that the splits maximize the mutual information between the input variables and the target variable, while, unlike decision trees, split only when the improvement is significant. The model also implements Fano's Inequality to estimate the maximum prediction error. Each level of the model allows for one attribute split, meaning all nodes at that level will be split by the selected attribute if significant, or directed to the target nodes ('leaf' nodes) and determined as terminal.
+The Information Fuzzy Network (IFN) machine learning model is designed to statistically find the best attribute to split by at each level of the model using chi-square test. It works with both categorical and numeric attributes, ensuring that the splits maximize the mutual information between the input variables and the target variable, while, unlike decision trees, split only when the improvement is significant. The model also implements Fano's Inequality to estimate the maximum prediction accuracy (min error) using the mutual information theory. Each level of the model allows for one attribute split, meaning all nodes at that level will be split by the selected attribute if significant, or directed to the target nodes ('leaf' nodes) and determined as terminal.
 
 ![Network Visualization](Images/IFN_Iris.png)
 
-The IFN model is useful for classification tasks. Below are the evaluation results on the Iris dataset, demonstrating good prediction performance.
+The IFN model is useful for classification tasks usually handled with decision trees. It is a statisticaly stable model which performs feature selection in a built-in method, using chi test. 
+
+Below are the evaluation results on the Iris dataset, demonstrating good prediction performance.
 
 ![Network Visualization](Images/IFN_Classification_Report.png)
 
 Train and prediction are possible on both categorical and numeric attributes, but note that the recursive optimal split detection on numeric ordinal variables can increase the runtime significantly, depends on the size of the data.
 
-Target column can be either int or str, as long as it's descrete and has a reasonable amount of labels compared to the data size.
+Target column can be either int or str, as long as it's descrete and has a reasonable amount of unique labels compared to the data size.
 
 To start, run the following command in the terminal:
 
@@ -18,7 +20,6 @@ To start, run the following command in the terminal:
 pip install -r requirements.txt
 python main.py
 ```
-
 
 ## Key Features
 
@@ -46,7 +47,7 @@ For numeric attributes, the model recursively finds the best splits by:
 
 ## Available Public Methods
 
-### IFN Class
+### IFN Class Methods
 
 - **`__init__(self, train_data, target, P_VALUE_THRESH, max_depth, weights_type)`**: Initializes the IFN model with the training data, target variable, and significance threshold. You can limit the depth to avoid overfitting (on edge cases) and weights_type controls the weights displayed when plotting.
 - **`show(self)`**: Plots the network visualization of the IFN model using NetworkX. NOTE: The plot represent "stronger" edges (higher probability) using darker colors, which should represent how a prediction will be made if a records "landed" in that node.
