@@ -2,6 +2,8 @@
 
 The Information Fuzzy Network (IFN) machine learning model is designed to statistically find the best attribute to split by at each level of the model using chi-square test. It works with both categorical and numeric attributes, ensuring that the splits maximize the mutual information between the input variables and the target variable, while, unlike decision trees, split only when the improvement is significant. The model also implements Fano's Inequality to estimate the maximum prediction accuracy (min error) using the mutual information theory. Each level of the model allows for one attribute split, meaning all nodes at that level will be split by the selected attribute if significant, or directed to the target nodes ('leaf' nodes) and determined as terminal.
 
+As shown in the viz, the built model resembles a "fully connected tree", and will choose the predicted class based on the majority rule at the terminal node.
+
 ![Network Visualization](Images/IFN_Iris.png)
 
 The IFN model is useful for classification tasks usually handled with decision trees. It is a statisticaly stable model which performs feature selection in a built-in method, using chi test. 
