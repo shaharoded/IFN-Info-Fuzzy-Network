@@ -1,0 +1,5 @@
+# Ignore specific files
+
+# Ignore an entire folder
+venv/
+__pycache__/

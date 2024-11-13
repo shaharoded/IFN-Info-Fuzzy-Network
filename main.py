@@ -20,8 +20,8 @@ def main():
 
     # Initialize and train the IFN model
     target_var = 'target'
-    ifn_cat = IFN(train_data, target_var)
-    ifn_cat.fit()
+    ifn_cat = IFN()
+    ifn_cat.fit(train_data, target_var)
     ifn_cat.show()
 
     # Define the function for classification report
