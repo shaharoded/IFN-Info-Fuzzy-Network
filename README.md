@@ -93,3 +93,12 @@ To commit and push all changes to the repository follow these steps:
     git commit -m "Reasons for disrupting GIT (commit message)"
     git push -u origin master / git push -f origin master   # If you want to force push
     ```
+
+## Acknowledgments
+This implementation was inspired by the `Advanced Topics in ML` course taught by **professor M.Last** at BGU. The model has been implemented in Python as a personal challenge and for educational purposes only. 
+
+Relevant foundational articles include:
+
+ - Maimon, O., Last, M. (2001). Information-Theoretic Connectionist Networks. In: Knowledge Discovery and Data Mining. Massive Computing, vol 1. Springer, Boston, MA. https://doi.org/10.1007/978-1-4757-3296-2_3
+ - Last, Mark, Abraham Kandel, and Oded Maimon. "Information-theoretic algorithm for feature selection." Pattern Recognition Letters 22.6-7 (2001): 799-811.‏
+ - Last, Mark, and Menahem Friedman. "Black-box testing with info-fuzzy networks." Artificial Intelligence Methods in Software Testing. 2004. 21-50.‏
