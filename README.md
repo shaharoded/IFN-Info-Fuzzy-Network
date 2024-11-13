@@ -89,13 +89,7 @@ NOTE: The model will log it's progress and selected features along the training 
 To commit and push all changes to the repository follow these steps:
 
     ```bash
-    git init
-    git remote add origin https://github.com/shaharoded/IFN-Info-Fuzzy-Network.git
-    git fetch origin
     git add .
     git commit -m "Reasons for disrupting GIT (commit message)"
-    git branch -M main
-    git push -u origin main / git push -f origin main   # If you want to force push
+    git push -u origin master / git push -f origin master   # If you want to force push
     ```
-
-    *Note: Replace `main` with your branch name if you're not using the `main` branch.*
