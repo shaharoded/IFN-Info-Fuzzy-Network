@@ -1,6 +1,6 @@
 # Information Fuzzy Network (IFN) Model
 
-The Information Fuzzy Network (IFN) machine learning model is designed to statistically find the best attribute to split by at each level of the model using chi-square test. It works with both categorical and numeric attributes, ensuring that the splits maximize the mutual information between the input variables and the target variable, while, unlike decision trees, split only when the improvement is significant. The model also implements Fano's Inequality to estimate the maximum prediction accuracy (min error) using the mutual information theory. Each level of the model allows for one attribute split, meaning all nodes at that level will be split by the selected attribute if significant, or directed to the target nodes ('leaf' nodes) and determined as terminal.
+The Information Fuzzy Network (IFN) machine learning model is designed to statistically find the best attribute to split by at each level of the model using chi-square test, as described in the works of **M.Last**. It works with both categorical and numeric attributes, ensuring that the splits maximize the mutual information between the input variables and the target variable, while, unlike decision trees, split only when the improvement is significant. The model also implements Fano's Inequality to estimate the maximum prediction accuracy (min error) using the mutual information theory. Each level of the model allows for one attribute split, meaning all nodes at that level will be split by the selected attribute if significant, or directed to the target nodes ('leaf' nodes) and determined as terminal.
 
 As shown in the viz, the built model resembles a "fully connected tree", and will choose the predicted class based on the majority rule at the terminal node.
 
@@ -93,3 +93,12 @@ To commit and push all changes to the repository follow these steps:
     git commit -m "Reasons for disrupting GIT (commit message)"
     git push -u origin master / git push -f origin master   # If you want to force push
     ```
+
+## Acknowledgments
+This implementation was inspired by the `Advanced Topics in ML` course taught by **professor M.Last** at BGU. The model has been implemented in Python as a personal challenge and for educational purposes only. 
+
+Relevant foundational articles include:
+
+ - Maimon, O., Last, M. (2001). Information-Theoretic Connectionist Networks. In: Knowledge Discovery and Data Mining. Massive Computing, vol 1. Springer, Boston, MA. https://doi.org/10.1007/978-1-4757-3296-2_3
+ - Last, Mark, Abraham Kandel, and Oded Maimon. "Information-theoretic algorithm for feature selection." Pattern Recognition Letters 22.6-7 (2001): 799-811.‏
+ - Last, Mark, and Menahem Friedman. "Black-box testing with info-fuzzy networks." Artificial Intelligence Methods in Software Testing. 2004. 21-50.‏
