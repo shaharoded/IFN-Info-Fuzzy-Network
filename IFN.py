@@ -69,21 +69,22 @@ class IFN:
             self.color = color
 
 
-    def __init__(self, train_data: pd.DataFrame, target: str, P_VALUE_THRESH: float = 0.1, max_depth: int = None, weights_type: str = 'probability'):
-        self.train_data = train_data
-        self.target = target
-        self.P_VALUE_THRESH = P_VALUE_THRESH
-        self.input_vars = {col: 0 for col in train_data.columns if col != target}  # Input vars with 1 for 'used'
-        self.N = len(train_data)
-        self.bin_suggestions = None
-        self.root = IFN.Node(train_data, level_attr='root', color='purple')
-        self.target_nodes = self.__init_target_nodes()
-        self.nodes = [self.root] + self.target_nodes
-        self.levels = []
+    def __init__(self):
+        self.train_data = None  # Training DataFrame (including target column)
+        self.target = None  # Target column name (str)
+        self.P_VALUE_THRESH = None  # Statistical thresh for split by the model
+        self.input_vars = {}  # Input vars with a mark of 1 for 'used' on 0 for not used
+        self.N = 0  # Number of records in the trained data
+        self.bin_suggestions = None     # Split points suggestions for every feature in the data
+        self.root = None    # The root's node
+        self.target_nodes = []  # The target nodes, based on the unique values of the target column
+        self.nodes = [self.root] + self.target_nodes    # All model's nodes
+        self.levels = []    # Levels are groups of nodes from the same layer (feature) in the model
         self.edges = []  # A tuple like (pointer, poitee, {weight, probability}), all non-terminal nodes get weight == None
-        self.max_depth = max_depth
-        self.weights_type = weights_type  # 'mutual' or 'probability'
-        self.plot = None
+        self.max_depth = 0  # Max possible selected layers for the model
+        self.weights_type = ''  # 'mutual' or 'probability', for plotting only.
+        self.plot = None    # The plot object (instead of 'print')
+        self.ready = False    # A readiness flag, signaling other methods from the model can be activated
 
 
     def __init_target_nodes(self):
@@ -343,15 +344,37 @@ class IFN:
 
 
     @time_method_call
-    def fit(self):
+    def fit(self, train_data: pd.DataFrame, target: str, P_VALUE_THRESH: float = 0.1, max_depth: int = None, weights_type: str = 'probability'):
         '''
-        Fit the IFN model to the training data.
+        Fit the IFN model to the training data, based on the target variable.
+        Args:
+            train_data (pd.DataFrame): The training data (including the target column)
+            target (str): The target column name in the train_data
+            P_VALUE_THRESH (float):
+            max_depth (int):
+            weights_type (str): 
         '''
+        # Update init variables
+        self.train_data = train_data
+        self.target = target
+        self.P_VALUE_THRESH = P_VALUE_THRESH
+        self.input_vars = {col: 0 for col in train_data.columns if col != target}  # Input vars with 1 for 'used'
+        self.N = len(train_data)
+        self.root = IFN.Node(train_data, level_attr='root', color='purple')
+        self.target_nodes = self.__init_target_nodes()
+        self.nodes = [self.root] + self.target_nodes
+        self.max_depth = max_depth
+        self.weights_type = weights_type
+        
+        # Train the model and build the network
         self.bin_suggestions = self.__init_create_bin_suggestions()  # A simplified version of threshold optimization
         self.__build_network([self.root])
         # Clean unused numerical column names
         self.bin_suggestions = {column: self.bin_suggestions[column] for column in self.bin_suggestions if self.input_vars[column] == 1}
         self.plot = self.__plot_network()
+        
+        # Flag the model is good-to-go
+        self.ready = True
 
     
     def __plot_network(self):
@@ -450,6 +473,8 @@ class IFN:
         '''
         Display the plot of the IFN network.
         '''
+        if not self.ready:
+            raise RuntimeError("Cannot use show() on an untrained model. Call fit() first.")
         self.plot.show()
 
 
@@ -462,6 +487,9 @@ class IFN:
         Returns:
             float, the minimum prediction error P_e.
         '''
+        if not self.ready:
+            raise RuntimeError("Cannot use calculate_min_error_probability() on an untrained model. Call fit() first.")
+        
         # Calculate the entropy H(A) of the target attribute
         prob = self.train_data[self.target].value_counts(normalize=True)
         entropy = -np.sum(prob * np.log2(prob))
@@ -535,6 +563,8 @@ class IFN:
         Returns:
             A pandas Series with the predicted target values.
         '''
+        if not self.ready:
+            raise RuntimeError("Cannot use predict() on an untrained model. Call fit() first.")
         # Create appropriate bins in input data
         if self.bin_suggestions:
             for attr in self.bin_suggestions:

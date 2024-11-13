@@ -51,7 +51,45 @@ For numeric attributes, the model recursively finds the best splits by:
 
 ### IFN Class Methods
 
-- **`__init__(self, train_data, target, P_VALUE_THRESH, max_depth, weights_type)`**: Initializes the IFN model with the training data, target variable, and significance threshold. You can limit the depth to avoid overfitting (on edge cases) and weights_type controls the weights displayed when plotting. Follow the initialization with **`fit(self)`** to build the model on the training data.
+- **`__init__(self)`**: Initializes the IFN model's object.
+- **`fit(self, train_data, target, P_VALUE_THRESH, max_depth, weights_type)`**: Building the network with the training data, target variable, and significance threshold, while performing all necessary calculations. You can limit the depth to avoid overfitting (on edge cases) and weights_type controls the weights displayed when plotting.
 - **`show(self)`**: Plots the network visualization of the IFN model using NetworkX. NOTE: The plot represent "stronger" edges (higher probability) using darker colors, which should represent how a prediction will be made if a records "landed" in that node.
 - **`predict(self, df)`**: Predicts the target variable for a given dataframe using the trained IFN model.
 - **`calculate_min_error_probability(self)`**: Assess the min error from the model on unseen data, using the edge weight. To use properly, train the model on your full dataset and and call this method. This will provide an upper boundry to the model's accuracy on unseen data.
+
+## Getting Started
+1. Clone this repository. Run the following command:
+
+```bash
+git clone https://github.com/shaharoded/IFN-Info-Fuzzy-Network.git
+```
+
+2. Set up a virtual environment and activate it:
+
+```bash
+python -m venv venv
+.\venv\Scripts\Activate
+```
+
+3. Install the required packages:
+
+```bash
+pip install -r requirements.txt
+```
+
+4. Use the `main.py` to load, train and test an instance of the model, as well as a reference for mathods usage.
+
+```bash
+python main.py
+```
+
+NOTE: The model will log it's progress and selected features along the training process.
+
+## GitHub Push Actions
+To commit and push all changes to the repository follow these steps:
+
+    ```bash
+    git add .
+    git commit -m "Reasons for disrupting GIT (commit message)"
+    git push -u origin master / git push -f origin master   # If you want to force push
+    ```
