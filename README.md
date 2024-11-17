@@ -60,6 +60,21 @@ For numeric attributes, the model recursively finds the best splits by:
 - **`load(file_path)`**: Loads a pre-trained model from file_path. Activation example can be shown at `main.py`.
 
 ## Getting Started
+### Using PYPI
+The Info-Fuzzy Network (IFN) model is now available on PyPI. You can install it directly using pip:
+
+```bash
+pip install InfoFuzzyNetwork --upgrade
+from InfoFuzzyNetwork import IFN
+```
+
+Be sure to have installed version 1.0.1. You can view using:
+
+```bash
+!pip show InfoFuzzyNetwork
+```
+
+### Or Use It Locally, Using Git
 1. Clone this repository. Run the following command:
 
 ```bash
@@ -97,10 +112,16 @@ To commit and push all changes to the repository follow these steps:
     ```
 
 ## Acknowledgments
-This implementation was inspired by the `Advanced Topics in ML` course taught by **professor M.Last** at BGU. The model has been implemented in Python as a personal challenge and for educational purposes only. 
+This implementation was inspired by the `Advanced Topics in ML` course taught by **professor M.Last** at BGU. The model has been implemented in Python as a personal challenge and for educational and research purposes. It is shared under an open-source license for anyone interested in using or extending it.
+While the code is entirely original and written by me, the algorithm and theoretical concepts are credited to M. Last (and any associates of his). 
 
 Relevant foundational articles include:
 
  - Maimon, O., Last, M. (2001). Information-Theoretic Connectionist Networks. In: Knowledge Discovery and Data Mining. Massive Computing, vol 1. Springer, Boston, MA. https://doi.org/10.1007/978-1-4757-3296-2_3
  - Last, Mark, Abraham Kandel, and Oded Maimon. "Information-theoretic algorithm for feature selection." Pattern Recognition Letters 22.6-7 (2001): 799-811.‏
  - Last, Mark, and Menahem Friedman. "Black-box testing with info-fuzzy networks." Artificial Intelligence Methods in Software Testing. 2004. 21-50.‏
+
+
+## Disclaimer
+This project implements an Info-Fuzzy Network (IFN) model based on the foundational concepts described in the work of M. Last and his associates. This implementation is independent, original, and created for educational and research purposes. Any resemblance to proprietary software is coincidental.
+
