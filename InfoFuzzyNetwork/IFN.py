@@ -12,8 +12,10 @@ import time
 import pickle
 
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Configure logging, nsure logs go to the console
+logging.basicConfig(level=logging.INFO, 
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    handlers=[logging.StreamHandler()])
 
 
 def validate_input_type(expected_type):
@@ -383,7 +385,14 @@ class IFN:
         Plot the IFN network and return the Figure object.
         Ensures compatibility with both local and Jupyter/Colab environments.
         '''
-        fig, ax = plt.subplots(figsize=(13, 5))  # Create a new figure
+        # Determine the dimensions for the plot
+        num_layers = len(self.levels)
+        max_layer_size = max(len(level) for level in self.levels) if self.levels else 1
+
+        # Adjust the figure size dynamically
+        fig_width = max(13, max_layer_size * 2.5)  # Minimum width of 13, scaled by layer size
+        fig_height = max(5, num_layers * 2.5)  # Minimum height of 5, scaled by the number of layers
+        fig, ax = plt.subplots(figsize=(fig_width, fig_height))
 
         G = nx.DiGraph()
         colors = []
@@ -393,13 +402,24 @@ class IFN:
 
         terminal_nodes = set()
 
-        # Add nodes to the graph
+        # Define the range for node placement (90% of the width)
+        plot_width_start = 0.05 * max_layer_size  # 5% padding on the left
+        plot_width_end = 0.95 * max_layer_size   # 5% padding on the right
+        available_width = plot_width_end - plot_width_start
+
+        # Add nodes to the graph and position them
         for level_index, level in enumerate(self.levels):
+            num_nodes = len(level)
             for node_index, node in enumerate(level):
                 node_id = id(node)
                 G.add_node(node_id)
                 colors.append(node.color if node.color != 'purple' else 'mediumpurple')
-                pos[node_id] = (node_index, -level_index)
+
+                # Space nodes equally within 90% of the width
+                x_pos = plot_width_start + node_index * available_width / max(1, num_nodes - 1)
+                y_pos = -level_index
+                pos[node_id] = (x_pos, y_pos)
+
                 if node.color != 'purple':
                     labels[node_id] = node.level_attr_val
                 if not any(child for (parent, child, _) in self.edges if id(parent) == node_id):
@@ -431,14 +451,19 @@ class IFN:
         nx.draw_networkx_labels(G, pos, ax=ax, labels=labels, font_size=5, font_color='black', font_family='sans-serif', font_weight='bold')
 
         # Add level lines and labels
-        max_x = max(x for x, y in pos.values())
         for level_index, level in enumerate(self.levels):
             if level:
                 first_node = level[0]
                 first_node_pos = pos[id(first_node)]
                 level_name = first_node.level_attr
-                ax.plot([0, max_x + 0.1], [first_node_pos[1], first_node_pos[1]], color='gray', linestyle='--', linewidth=0.5)
-                ax.text(max_x + 0.15, first_node_pos[1], level_name, verticalalignment='center', fontsize=9, color='gray')
+
+                # Draw level line
+                ax.plot([plot_width_start, plot_width_end], [first_node_pos[1], first_node_pos[1]], color='gray', linestyle='--', linewidth=0.5)
+
+                # Position the feature name label further to the right
+                label_padding = 0.1 * available_width  # 10% of the available width
+                ax.text(plot_width_end + label_padding, first_node_pos[1], level_name, verticalalignment='center', fontsize=9, color='gray')
+
         return fig
 
         

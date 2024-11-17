@@ -1,5 +1,5 @@
 from InfoFuzzyNetwork import *
-from sklearn.datasets import load_iris
+from sklearn.datasets import load_iris, load_wine
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 import pandas as pd
@@ -14,15 +14,27 @@ def test_model(model, test_data, target_var):
     print(classification_report(test_labels, predictions))
     
 
-def main():
+def main(dataset='iris'):
     # Load the dataset
-    iris = load_iris()
-    data = pd.DataFrame(data= np.c_[iris['data'], iris['target']],
-                    columns= iris['feature_names'] + ['target'])
+    if dataset=='iris':
+        iris = load_iris()
+        data = pd.DataFrame(data= np.c_[iris['data'], iris['target']],
+                        columns= iris['feature_names'] + ['target'])
 
-    # Map target values to species names
-    target_names = {0: 'setosa', 1: 'versicolor', 2: 'virginica'}
-    data['target'] = data['target'].map(target_names)
+        # Map target values to species names
+        target_names = {0: 'setosa', 1: 'versicolor', 2: 'virginica'}
+        data['target'] = data['target'].map(target_names)
+    
+    elif dataset=='wine':
+        wine = load_wine()
+        data = pd.DataFrame(data=wine['data'], columns=wine['feature_names'])
+        data['target'] = wine['target']
+
+        # Map target values to class names
+        target_names = {i: name for i, name in enumerate(wine['target_names'])}
+        data['target'] = data['target'].map(target_names)
+    else:
+        raise ValueError('Invalid dataset')
     
     # Split the dataset into training and testing sets
     train_data, test_data = train_test_split(data, test_size=0.2, random_state=42)
@@ -49,5 +61,5 @@ def main():
     return loaded_model
 
 if __name__ == "__main__":
-    model = main()
+    model = main(dataset='iris')
     model.show()    # Check plot, and the model loaded properly
