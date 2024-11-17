@@ -1,4 +1,5 @@
 # Ignore specific files
+ifn_model.pkl
 
 # Ignore an entire folder
 venv/

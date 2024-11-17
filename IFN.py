@@ -9,6 +9,7 @@ import matplotlib.colors as mcolors
 import logging
 from functools import wraps
 import time
+import pickle
 
 
 # Configure logging
@@ -379,11 +380,10 @@ class IFN:
     
     def __plot_network(self):
         '''
-        Plot the IFN network.
-
-        Returns:
-            matplotlib.pyplot: The plot object.
+        Plot the IFN network and return the Figure object.
+        Ensures that only one figure is active at a time.
         '''
+        fig = plt.figure(figsize=(13, 5))  # Create a new figure
         G = nx.DiGraph()
         colors = []
         pos = {}
@@ -397,76 +397,52 @@ class IFN:
             for node_index, node in enumerate(level):
                 node_id = id(node)
                 G.add_node(node_id)
-                # Control node color luminance
                 colors.append(node.color if node.color != 'purple' else 'mediumpurple')
-                # Assign positions based on level and order within the level
                 pos[node_id] = (node_index, -level_index)
-                # Add label if the node is not a root node (purple)
                 if node.color != 'purple':
                     labels[node_id] = node.level_attr_val
-                # Determine terminal nodes
                 if not any(child for (parent, child, _) in self.edges if id(parent) == node_id):
                     terminal_nodes.add(node_id)
 
-        # Add edges to the graph, only include weights that are not None
         for (parent, child, weight) in self.edges:
             parent_id = id(parent)
             child_id = id(child)
-            # Ensure weight is a valid number and not None
             if weight is not None:
-                if self.weights_type == 'probability':
-                    edge_weights.append(weight['probability'])
-                else:
-                    edge_weights.append(weight['weight'])
+                edge_weights.append(weight['probability'] if self.weights_type == 'probability' else weight['weight'])
                 G.add_edge(parent_id, child_id)
             else:
                 G.add_edge(parent_id, child_id)
-                edge_weights.append(0.0)  # Assign a default weight if none is provided
+                edge_weights.append(0.0)
 
-        # Normalize edge weights for colormap
         norm = mcolors.Normalize(vmin=-0.5, vmax=max(edge_weights))
         cmap = plt.cm.get_cmap('Purples')
-
-        # Set edge colors
         edge_colors = []
         for (parent, child) in G.edges():
             if child in terminal_nodes:
                 weight = edge_weights.pop(0)
                 edge_colors.append(cmap(norm(weight)))
             else:
-                edge_colors.append(cmap(0.4))  # Medium grey for non-terminal edges
+                edge_colors.append(cmap(0.4))
 
-        # Create a wider figure
-        plt.figure(figsize=(13, 5))  # Adjust the width and height as needed
-
-        # Draw the graph with bigger nodes and brighter colors
         nx.draw(G, pos, with_labels=False, node_color=colors, node_size=800, alpha=0.6, edge_color=edge_colors)
         nx.draw_networkx_labels(G, pos, labels=labels, font_size=5, font_color='black', font_family='sans-serif', font_weight='bold')
 
-        # Add a color bar as a legend
         norm = mcolors.Normalize(vmin=0, vmax=max(edge_weights))
         sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
         sm.set_array([])
         cbar = plt.colorbar(sm)
         cbar.set_label('Edge Weight')
-    
-        # Find the maximum x-coordinate of the nodes
-        max_x = max(x for x, y in pos.values())
 
-        # Draw level names with dashed lines
+        max_x = max(x for x, y in pos.values())
         for level_index, level in enumerate(self.levels):
             if level:
                 first_node = level[0]
-                first_node_id = id(first_node)
-                first_node_pos = pos[first_node_id]
-                level_name = first_node.level_attr  # Assuming all nodes in the level have the same level_attr
-
-                # Draw dashed line for the level
+                first_node_pos = pos[id(first_node)]
+                level_name = first_node.level_attr
                 plt.plot([0, max_x + 0.1], [first_node_pos[1], first_node_pos[1]], color='gray', linestyle='--', linewidth=0.5)
-                # Add level name text slightly to the right of the most right node
                 plt.text(max_x + 0.15, first_node_pos[1], level_name, verticalalignment='center', fontsize=9, color='gray')
-         
-        return plt
+
+        return fig  # Return the Figure object
 
     
     def show(self):
@@ -571,3 +547,71 @@ class IFN:
                 bin_labels = [f"({self.bin_suggestions[attr][i]}, {self.bin_suggestions[attr][i+1]}]" for i in range(len(self.bin_suggestions[attr])-1)]
                 df[attr] = pd.cut(df[attr], bins=self.bin_suggestions[attr], labels=bin_labels)
         return df.apply(lambda record: self.__predict_record(record), axis=1)
+    
+    
+    def __getstate__(self):
+        '''
+        Prepare the object's state for pickling by excluding non-pickleable attributes.
+
+        This method is automatically called when pickling the object. It creates a copy
+        of the object's dictionary (`__dict__`) and excludes specific attributes that
+        cannot or should not be pickled. For example, the 'plot' attribute is excluded
+        as it contains a matplotlib plot object.
+
+        Returns:
+            dict: A dictionary representing the pickleable state of the object.
+        '''
+        state = self.__dict__.copy()
+        state['plot'] = None  # Exclude plot from serialization
+        return state
+
+
+    def __setstate__(self, state):
+        '''
+        Restore the object's state after unpickling.
+
+        This method is automatically called when unpickling the object. It updates the
+        object's dictionary with the saved state and reinitializes specific attributes
+        if necessary. For example, it recreates the 'plot' attribute if the model is ready.
+
+        Args:
+            state (dict): The dictionary representing the object's state.
+        '''
+        self.__dict__.update(state)
+        if self.ready:  # Recreate the plot if the model is trained and ready
+            self.plot = self.__plot_network()
+            
+    
+    def save(self, file_path: str):
+        '''
+        Save the IFN model to a file using pickle.
+
+        Args:
+            file_path (str): Path to the file where the model will be saved.
+        
+        Raises:
+            IOError: If the file cannot be written to.
+        '''
+        with open(file_path, 'wb') as f:
+            pickle.dump(self, f)
+        logging.info(f"Model saved to {file_path}.")
+
+
+    @staticmethod
+    def load(file_path: str) -> 'IFN':
+        '''
+        Load an IFN model from a pickle file.
+
+        Args:
+            file_path (str): Path to the file from which the model will be loaded.
+
+        Returns:
+            IFN: The loaded IFN model instance.
+
+        Raises:
+            IOError: If the file cannot be read.
+        '''
+        with open(file_path, 'rb') as f:
+            model = pickle.load(f)
+        logging.info(f"Model loaded from {file_path}.")
+        return model
