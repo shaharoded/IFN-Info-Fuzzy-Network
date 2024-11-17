@@ -47,10 +47,6 @@ def main(dataset='iris'):
 
     # Calculate min error probability
     print(f"Max error in the model based on Fano's Inequality: {ifn_cat.calculate_min_error_probability()}")
-    
-    # Test original model
-    print('Test original model')
-    test_model(ifn_cat, test_data, target_var)
     ifn_cat.save(model_path)
     
     # Test model's saving and loading ability, along with performance (get the classification report)

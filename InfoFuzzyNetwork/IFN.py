@@ -328,6 +328,9 @@ class IFN:
         if best_attr is None:
             logging.info('No attribute was chosen, define level nodes as terminal and exit function')
             self.levels.append(self.target_nodes)
+            # Inner-Sort levels
+            for level in self.levels:
+                level.sort(key=lambda node: node.level_attr_val)
             return
 
         next_level = []
