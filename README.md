@@ -65,7 +65,7 @@ from InfoFuzzyNetwork import IFN
 Be sure to have installed version 1.0.4. You can view using:
 
 ```bash
-!pip show InfoFuzzyNetwork
+pip show InfoFuzzyNetwork
 ```
 
 ### Or Use It Locally, Using Git
