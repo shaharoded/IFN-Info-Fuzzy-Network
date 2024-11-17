@@ -16,13 +16,6 @@ Train and prediction are possible on both categorical and numeric attributes, bu
 
 Target column can be either int or str, as long as it's descrete and has a reasonable amount of unique labels compared to the data size.
 
-To start, run the following command in the terminal:
-
-```
-pip install -r requirements.txt
-python main.py
-```
-
 ## Key Features
 
 1. **General Attribute Splitting**: Handles both categorical and numeric attributes, identifying the best attribute to split by at each level.
