@@ -3,7 +3,7 @@ from pathlib import Path
 
 setup(
     name='InfoFuzzyNetwork',
-    version='1.0.3',  # Package version
+    version='1.0.4',  # Package version
     packages=find_packages(),  # Automatically find all packages
     install_requires=[
         'numpy',  # Dependencies

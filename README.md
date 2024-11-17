@@ -69,7 +69,7 @@ pip install InfoFuzzyNetwork --upgrade
 from InfoFuzzyNetwork import IFN
 ```
 
-Be sure to have installed version 1.0.3. You can view using:
+Be sure to have installed version 1.0.4. You can view using:
 
 ```bash
 !pip show InfoFuzzyNetwork
@@ -128,4 +128,4 @@ This project implements an Info-Fuzzy Network (IFN) model based on the foundatio
 
 ## TO-DO
 A discrepancy has been observed between local and cloud environments when plotting. In cloud environments, loading the model can occasionally trigger an unintended `self.show()` call. Stricter QA and validation across different use cases could address this issue, though it does not significantly impact regular functionality.
-It is also important to note that plotting dimensions and loggings might be interpreted differently across various environments, so for the best experience you may prefer to use this code locally.
+It is also important to note that plotting dimensions might be interpreted differently across various environments, so for the best experience you may prefer to use this code locally.
