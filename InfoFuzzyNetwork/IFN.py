@@ -7,15 +7,27 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import logging
+import sys
 from functools import wraps
 import time
 import pickle
 
 
-# Configure logging, nsure logs go to the console
-logging.basicConfig(level=logging.INFO, 
-                    format='%(asctime)s - %(levelname)s - %(message)s',
-                    handlers=[logging.StreamHandler()])
+# Create a logger
+logger = logging.getLogger()  # You can also specify a name like getLogger('my_logger') if you prefer
+logger.setLevel(logging.INFO)
+
+# Create a stream handler to print to console
+console_handler = logging.StreamHandler(sys.stdout)  # Explicitly set to sys.stdout to ensure proper display in Colab
+console_handler.setLevel(logging.INFO)
+
+# Set format for the console handler
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+console_handler.setFormatter(formatter)
+
+# Avoid adding multiple handlers if the logger is already set up
+if not logger.hasHandlers():
+    logger.addHandler(console_handler)
 
 
 def validate_input_type(expected_type):

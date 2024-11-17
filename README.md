@@ -128,4 +128,4 @@ This project implements an Info-Fuzzy Network (IFN) model based on the foundatio
 
 ## TO-DO
 A discrepancy has been observed between local and cloud environments when plotting. In cloud environments, loading the model can occasionally trigger an unintended `self.show()` call. Stricter QA and validation across different use cases could address this issue, though it does not significantly impact regular functionality.
-It is also important to note that plotting dimensions might be interpreted differently across various environments, so it's better to use this code locally if you wish to plot the network.
+It is also important to note that plotting dimensions and loggings might be interpreted differently across various environments, so for the best experience you may prefer to use this code locally.
