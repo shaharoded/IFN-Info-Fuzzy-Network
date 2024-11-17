@@ -124,3 +124,4 @@ Relevant foundational articles include:
 
 ## Disclaimer
 This project implements an Info-Fuzzy Network (IFN) model based on the foundational concepts described in the work of M. Last and his associates. This implementation is independent, original, and created for educational and research purposes. Any resemblance to proprietary software is coincidental.
+
