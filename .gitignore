@@ -1,6 +1,32 @@
-# Ignore specific files
-ifn_model.pkl
+# Byte-compiled / optimized / DLL files
+*.py[cod]
+*.so
 
-# Ignore an entire folder
+# C extensions
+*.pyd
+
+# Packages
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Environment and dependencies
 venv/
+.env
+*.env
 __pycache__/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Logs and debugging files
+*.log
+*.out
+*.err
+
+# Configuration files with sensitive information
+.pypirc
+
+# Miscellaneous
+ifn_model.pkl

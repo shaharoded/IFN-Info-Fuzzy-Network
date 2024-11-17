@@ -1,4 +1,4 @@
-from IFN import *
+from InfoFuzzyNetwork import *
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
@@ -12,15 +12,7 @@ def test_model(model, test_data, target_var):
 
     predictions = model.predict(test_features)
     print(classification_report(test_labels, predictions))
-
-
-def test_with_pickle(test_data, target_var, model_path = 'ifn_model.pkl'):
-    # Load the model
-    loaded_model = IFN.load(model_path)
     
-    # Test the loaded model
-    test_model(loaded_model, test_data, target_var)
-    return loaded_model
 
 def main():
     # Load the dataset
@@ -40,14 +32,22 @@ def main():
     model_path = 'ifn_model.pkl'
     ifn_cat = IFN()
     ifn_cat.fit(train_data, target_var)
-    ifn_cat.save(model_path)
 
     # Calculate min error probability
     print(f"Max error in the model based on Fano's Inequality: {ifn_cat.calculate_min_error_probability()}")
     
+    # Test original model
+    print('Test original model')
+    test_model(ifn_cat, test_data, target_var)
+    ifn_cat.save(model_path)
+    
     # Test model's saving and loading ability, along with performance (get the classification report)
-    model = test_with_pickle(test_data, target_var, model_path)
-    model.show()
+    print('Test loaded model')
+    loaded_model = IFN.load(model_path)
+    test_model(loaded_model, test_data, target_var)
+    
+    return loaded_model
 
 if __name__ == "__main__":
-    main()
+    model = main()
+    model.show()    # Check plot, and the model loaded properly
