@@ -124,3 +124,6 @@ Relevant foundational articles include:
 
 ## Disclaimer
 This project implements an Info-Fuzzy Network (IFN) model based on the foundational concepts described in the work of M. Last and his associates. This implementation is independent, original, and created for educational and research purposes. Any resemblance to proprietary software is coincidental.
+
+## TO-DO
+The `self.show()` method currently displays a pre-generated plot created during `self.fit()`. While the plot's dimensions can be customized when running the code locally, this flexibility is not available when using the package via PyPI. Implementing a dynamic mechanism for adjusting plot dimensions directly through the method could be a useful enhancement for future versions.
