@@ -60,6 +60,7 @@ For numeric attributes, the model recursively finds the best splits by:
 - **`load(file_path)`**: Loads a pre-trained model from file_path. Activation example can be shown at `main.py`.
 
 ## Getting Started
+
 ### Using PYPI
 The Info-Fuzzy Network (IFN) model is now available on PyPI. You can install it directly using pip:
 
@@ -108,7 +109,7 @@ To commit and push all changes to the repository follow these steps:
     ```bash
     git add .
     git commit -m "Reasons for disrupting GIT (commit message)"
-    git push -u origin master / git push -f origin master   # If you want to force push
+    git push -u origin main / git push -f origin main   # If you want to force push
     ```
 
 ## Acknowledgments
