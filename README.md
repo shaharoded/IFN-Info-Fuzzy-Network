@@ -69,7 +69,7 @@ pip install InfoFuzzyNetwork --upgrade
 from InfoFuzzyNetwork import IFN
 ```
 
-Be sure to have installed version 1.0.2. You can view using:
+Be sure to have installed version 1.0.3. You can view using:
 
 ```bash
 !pip show InfoFuzzyNetwork
